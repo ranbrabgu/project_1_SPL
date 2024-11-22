@@ -6,9 +6,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <Auxiliary.h>
-#include "Facility.h"  // Make sure this is included where you need to use FacilityCategory
-#include "Settlement.h"  // Include the header file
-#include "Plan.h"
+
 
 using std::cout;
 using std::endl;
