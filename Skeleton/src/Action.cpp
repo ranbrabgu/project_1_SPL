@@ -45,3 +45,59 @@ const string AddPlan::toString() const {
 AddPlan *AddPlan::clone() const {
     return new AddPlan(*this);
 }
+
+
+
+AddSettlement::AddSettlement(const string &settlementName,SettlementType settlementType):settlementName(settlementName),settlementType(settlementType){}
+ 
+ void AddSettlement:: act(Simulation &simulation) {
+    Settlement settlement(settlementName, settlementType);
+    simulation.addSettlement(settlement); 
+}
+
+//AddSettlement *AddSettlement:: *clone() {return new AddSettlement(*this)}
+const string AddSettlement::toString()const {
+    string typeStr;
+    switch (settlementType) {
+        case SettlementType::VILLAGE:
+            typeStr = "Village";
+            break;
+        case SettlementType::CITY:
+            typeStr = "City";
+            break;
+        case SettlementType::METROPOLIS:
+            typeStr = "Metropolis";
+            break;
+        default:
+            typeStr = "Unknown";
+            break;
+    }
+    return settlementName + " (" + typeStr + ")";
+}
+
+
+AddFacility::AddFacility(const string &facilityName, const FacilityCategory facilityCategory, const int price, const int lifeQualityScore, const int economyScore, const int environmentScore)
+    : facilityName(facilityName),  // Use member variable names
+      facilityCategory(facilityCategory),
+      price(price),
+      lifeQualityScore(lifeQualityScore),
+      economyScore(economyScore),
+      environmentScore(environmentScore) {}
+
+void AddFacility::act(Simulation &simulation) {
+    // Dynamically create the facility
+    FacilityType* facility = new FacilityType(facilityName, facilityCategory, price, lifeQualityScore, economyScore, environmentScore);
+    simulation.addFacility(*facility);  // Pass the pointer
+}
+
+AddFacility *clone() {
+
+}
+const string AddFacility::toString() const {
+    return "AddFacility: " + facilityName + 
+           " [Category: " + std::to_string(static_cast<int>(facilityCategory)) +
+           ", Price: " + std::to_string(price) +
+           ", Life Quality: " + std::to_string(lifeQualityScore) +
+           ", Economy: " + std::to_string(economyScore) +
+           ", Environment: " + std::to_string(environmentScore) + "]";
+}
