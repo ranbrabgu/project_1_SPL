@@ -30,7 +30,7 @@ const string &BaseAction::getErrorMsg() const {
 
 AddPlan::AddPlan(const string &settlementName, const string &selectionPolicy): settlementName(settlementName), selectionPolicy(selectionPolicy) {}
     void AddPlan::act(Simulation &simulation) {
-
+        simulation.addPlan(simulation.getSettlement(settlementName),simulation.getSellectionPolicy(selectionPolicy));
 } 
 const string AddPlan::toString() const {
     return "AddPlan for " + settlementName + " using policy " + selectionPolicy;

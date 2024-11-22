@@ -30,6 +30,8 @@ class Simulation {
         void CreateFacility(const vector<string>& args);
         void addFacilityToPlan(const vector<string>& args);
         void CreatePlan(const vector<string>& args);
+        SelectionPolicy getSellectionPolicy(string policy);
+ 
 
 
     private:

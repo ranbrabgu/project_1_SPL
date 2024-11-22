@@ -195,6 +195,20 @@ void Simulation::CreateFacility(const vector<string>& args) {
     Facility f(args[1], settlementName, cat, price, lifeQuality_score, economy_score, environment_score); 
     addFacility(f);
 }
+ SelectionPolicy Simulation::getSellectionPolicy(string policy){
+        if (policy == "eco") {
+        s1 = new EconomySelection();
+    }
+    else if (policy == "bal") {
+        s1 = new BalancedSelection(0, 0, 0);  // Adjust parameters as needed
+    }
+    else if (policy == "nve") {
+        s1 = new NaiveSelection();
+    }
+    else if (policy== "env") {
+        s1 = new SustainabilitySelection();
+    }
+}
 
 
 
