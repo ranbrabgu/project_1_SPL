@@ -29,13 +29,19 @@ const string &BaseAction::getErrorMsg() const {
 
 
 AddPlan::AddPlan(const string &settlementName, const string &selectionPolicy): settlementName(settlementName), selectionPolicy(selectionPolicy) {}
-    void AddPlan::act(Simulation &simulation) {
-        simulation.addPlan(simulation.getSettlement(settlementName),simulation.getSellectionPolicy(selectionPolicy));
-} 
+void AddPlan::act(Simulation &simulation) {
+    try {
+        Settlement &settlement = simulation.getSettlement(settlementName);
+        SelectionPolicy* policy = simulation.getSellectionPolicy(selectionPolicy);
+        simulation.addPlan(settlement, policy);  // Add the plan
+        complete();  // Mark the action as completed
+    } catch (const std::exception &e) {
+        error("Error during AddPlan: " + string(e.what()));
+    }
+}
 const string AddPlan::toString() const {
     return "AddPlan for " + settlementName + " using policy " + selectionPolicy;
 }
-
 AddPlan *AddPlan::clone() const {
     return new AddPlan(*this);
 }

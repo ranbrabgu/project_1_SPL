@@ -195,20 +195,21 @@ void Simulation::CreateFacility(const vector<string>& args) {
     Facility f(args[1], settlementName, cat, price, lifeQuality_score, economy_score, environment_score); 
     addFacility(f);
 }
- SelectionPolicy Simulation::getSellectionPolicy(string policy){
-        if (policy == "eco") {
-        s1 = new EconomySelection();
-    }
-    else if (policy == "bal") {
-        s1 = new BalancedSelection(0, 0, 0);  // Adjust parameters as needed
-    }
-    else if (policy == "nve") {
-        s1 = new NaiveSelection();
-    }
-    else if (policy== "env") {
-        s1 = new SustainabilitySelection();
+SelectionPolicy* Simulation::getSellectionPolicy(const string &policy) {
+    if (policy == "eco") {
+        return new EconomySelection();
+    } else if (policy == "bal") {
+        return new BalancedSelection(0, 0, 0);  // Adjust parameters if needed
+    } else if (policy == "nve") {
+        return new NaiveSelection();
+    } else if (policy == "env") {
+        return new SustainabilitySelection();
+    } else {
+        throw std::invalid_argument("Unknown selection policy: " + policy);
     }
 }
+
+
 
 
 
