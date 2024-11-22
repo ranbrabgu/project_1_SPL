@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Linux",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/bin/main", // Change to your compiled program path
+        "args": ["config_file.txt"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "externalConsole": true, // Use external console for debugging output
+        "MIMode": "gdb",
+        "miDebuggerPath": "/usr/bin/gdb",
+        "preLaunchTask": "build",  // Make sure this matches your build task label
+        "logging": {
+          "engineLogging": true,
+          "trace": true
+        }
+      }
+    ]
+  }
+  
