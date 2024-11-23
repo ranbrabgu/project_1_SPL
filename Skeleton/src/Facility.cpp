@@ -2,6 +2,10 @@
 
 
 
+#ifndef FACILITY_H
+#define FACILITY_H
+
+
 
 FacilityType::FacilityType(const string &name, const FacilityCategory category, const int price, const int lifeQuality_score, const int economy_score, const int environment_score)
     : name(name), category(category), price(price), lifeQuality_score(lifeQuality_score), economy_score(economy_score), environment_score(environment_score) {}
@@ -50,7 +54,21 @@ const int Facility::getTimeLeft() const {
 
 
 
-FacilityStatus step();
+FacilityStatus Facility:: step(){
+    if(getTimeLeft()==1){
+        SetTimeLeft(0);
+        status=FacilityStatus::OPERATIONAL;
+        setStatus(status);
+        return status;
+    }
+    else{
+        SetTimeLeft(getTimeLeft()-1);
+        return FacilityStatus::UNDER_CONSTRUCTIONS;
+    }
+}
+  void Facility::SetTimeLeft(int num){
+    timeLeft=num;
+  }
 
 
 
@@ -64,4 +82,4 @@ const string Facility::toString() const {
     string statusStr = (status == FacilityStatus::UNDER_CONSTRUCTIONS) ? "Under Construction" : "Operational";
     return name + " in " + settlementName + " [" + statusStr + ", Time Left: " + std::to_string(timeLeft) + "]";
 }
-
+#endif // FACILITY_H

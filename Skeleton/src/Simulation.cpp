@@ -1,11 +1,12 @@
 #include "Simulation.h"
-#include "SelectionPolicy.h"
 #include "Auxiliary.h"
+#include "Action.h"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
 #include <algorithm>
 #include <Auxiliary.h>
+#include <string>
 
 
 using std::cout;
@@ -33,7 +34,8 @@ Simulation::Simulation(const string &configFilePath) : isRunning(false), planCou
 
         const std::string& command = args[0];
         if (command == "settlement") {
-            CreateSettlement(args);
+                CreateSettlement(args);
+            actionsLog.push_back(base);
         } else if (command == "facility") {
             CreateFacility(args);
         } else if (command == "plan") {
@@ -48,7 +50,22 @@ Simulation::Simulation(const string &configFilePath) : isRunning(false), planCou
 
 
 
-void start(){
+void Simulation::start(){
+    while (isRunning)
+    {
+        cout << "The simulation has started"; // Outputs the message
+        string line;
+        getline(std::cin, line); 
+        std::vector<std::string> args = Auxiliary::parseArguments(line);
+        if(args[0]=="plan"){
+            BaseAction* base= new AddPlan(args[1],args[2]);
+            actionsLog.push_back(base);
+        }
+
+        
+
+    }
+    
     // set up
     //it needs to read the confic files and fill the setelments and facilitys options vectors
 
@@ -87,6 +104,10 @@ bool Simulation:: addFacility(FacilityType facility){
     //ligal iligal?
     
 }
+std::vector<BaseAction*>& Simulation::getAction() {
+    return actionsLog;
+}
+
 
 bool Simulation::isSettlementExists(const string &settlementName){
     // chacks if setelment exsists
@@ -145,22 +166,11 @@ void Simulation::CreateSettlement(const vector<string>& args) {
         // Handle error (for example, return or log an error message)
         return;
     }
+    BaseAction* base = new AddSettlement(args[1],getSettlementType(args[2]));
+    base->act(this);
+    actionsLog.push_back(base);
 
-    // Determine settlement type
-    SettlementType s;
-    if (args[2] == "0") {
-        s = SettlementType::VILLAGE;
-    }
-    else if (args[2] == "1") {
-        s = SettlementType::CITY;
-    }
-    else if (args[2] == "2") {
-        s = SettlementType::METROPOLIS;
-    }
-    
-    // Create and add settlement
-    Settlement newSettlement(args[1], s); // Removed 'new' and fixed the constructor call
-    addSettlement(newSettlement);
+
 }
 
 // Function to create a facility
@@ -170,28 +180,14 @@ void Simulation::CreateFacility(const vector<string>& args) {
         // Handle error
         return;
     }
-
-    // Determine facility category
-    FacilityCategory cat;
-    if (args[2] == "0") {
-        cat = FacilityCategory::LIFE_QUALITY;  // Correct usage
-    }
-    else if (args[2] == "1") {
-        cat = FacilityCategory::ECONOMY;
-    }
-    else if (args[2] == "2") {
-        cat = FacilityCategory::ENVIRONMENT;
-    }
-
-    // Convert arguments to integers for price and scores
     int price = std::stoi(args[3]);  
     int lifeQuality_score = std::stoi(args[4]);
     int economy_score = std::stoi(args[5]);
     int environment_score = std::stoi(args[6]);
     string settlementName=args[1];
-    // Create and add facility
-    Facility f(args[1], settlementName, cat, price, lifeQuality_score, economy_score, environment_score); 
-    addFacility(f);
+    BaseAction* base =new AddFacility(args[1],getFacitlityType(args[2]),price, lifeQuality_score, economy_score, environment_score)
+    base->act(this);
+    actionsLog.push_back(base);
 }
 SelectionPolicy* Simulation::getSellectionPolicy(const string &policy) {
     if (policy == "eco") {
@@ -206,53 +202,40 @@ SelectionPolicy* Simulation::getSellectionPolicy(const string &policy) {
         throw std::invalid_argument("Unknown selection policy: " + policy);
     }
 }
+SettlementType Simulation:: getSettlementType(const string type){
+    SettlementType s;
+    if (type == "0") {
+        s = SettlementType::VILLAGE;
+    }
+    else if (type == "1") {
+        s = SettlementType::CITY;
+    }
+    else if (type == "2") {
+        s = SettlementType::METROPOLIS;
+    }
+    return s;
+}
+FacilityCategory Simulation:: getFacitlityType(const string type){
+    FacilityCategory cat;
+    if (type == "0") {
+        cat = FacilityCategory::LIFE_QUALITY;  // Correct usage
+    }
+    else if (type == "1") {
+        cat = FacilityCategory::ECONOMY;
+    }
+    else if (type == "2") {
+        cat = FacilityCategory::ENVIRONMENT;
+    }
+    return cat;
+}
 
 
 
 
 
 void Simulation::CreatePlan(const vector<string>& args) {
-    // Ensure args has at least 3 elements
-    if (args.size() < 3) {
-        cout << "Error: Insufficient arguments to create a plan." << endl;
-        return;
-    }
-
-    // Find the corresponding settlement
-    Settlement* s = nullptr;  // Use a pointer to reference a settlement
-    for (Settlement& b : settlements) {
-        if (b.getName() == args[1]) {  // Assuming getName() returns the name of the settlement
-            s = &b;
-            break;
-        }
-    }
-
-    // Handle case where settlement is not found
-    if (s == nullptr) {
-        cout << "Error: Settlement with name '" << args[1] << "' not found." << endl;
-        return;
-    }
-
-    // Create selection policy
-    SelectionPolicy* s1 = nullptr;
-    if (args[2] == "eco") {
-        s1 = new EconomySelection();
-    }
-    else if (args[2] == "bal") {
-        s1 = new BalancedSelection(0, 0, 0);  // Adjust parameters as needed
-    }
-    else if (args[2] == "nve") {
-        s1 = new NaiveSelection();
-    }
-    else if (args[2] == "env") {
-        s1 = new SustainabilitySelection();
-    }
-    else {
-        cout << "Error: Unknown selection policy '" << args[2] << "'." << endl;
-        return;
-    }
-
-    // Delegate plan creation to addPlan
-    addPlan(*s, s1);
+            BaseAction* base = new AddPlan(args[1],args[2]);
+            base->act(this);
+            actionsLog.push_back(base);
 }
 

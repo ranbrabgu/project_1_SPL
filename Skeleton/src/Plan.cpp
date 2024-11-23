@@ -10,11 +10,12 @@ Plan::Plan(const int planId, const Settlement &settlement, SelectionPolicy *sele
     : plan_id(planId),
       settlement(settlement),
       selectionPolicy(selectionPolicy),
-      facilityOptions(facilityOptions),
-      status(PlanStatus::AVALIABLE),
+      facilityOptions(facilityOptions), // Add a comma here
+      status(PlanStatus::AVALIABLE),    // Fix the spelling of AVAILABLE
       life_quality_score(0),
       economy_score(0),
       environment_score(0) {}
+
 
 const int Plan::getlifeQualityScore() const {
     return life_quality_score;
@@ -34,6 +35,7 @@ const vector<Facility*> &Plan::getFacilities() const {
 
 // Set Selection Policy
 void Plan::setSelectionPolicy(SelectionPolicy *selectionPolicy) {
+    delete this->selectionPolicy;
     this->selectionPolicy = selectionPolicy;
 }
 void Plan::addFacility(Facility* facility) {
@@ -46,12 +48,19 @@ void Plan::printStatus() {
 }
 
 void Plan::step() {
-    /// complete the action
-    
-    /// for all in constraction 1 day less
-
-    /// chage statuse as needed
+    for (auto it = underConstruction.begin(); it != underConstruction.end(); ) {
+        FacilityStatus st = (*it)->step(); // Dereference the iterator to get the Facility object, then call step()
+        if (st == FacilityStatus::OPERATIONAL) {
+            this->status = PlanStatus::AVALIABLE; // Assign the status
+            it = underConstruction.erase(it);    // Erase and get the next valid iterator
+        } else {
+            ++it; // Move to the next element
+        }
+    }
 }
+
+
+
 const int Plan::getPlanId(){
     return plan_id;
 }
@@ -63,5 +72,13 @@ const string Plan::toString() const {
     str += "Life Quality Score: " + std::to_string(life_quality_score) + "\n";
     str += "Economy Score: " + std::to_string(economy_score) + "\n";
     str += "Environment Score: " + std::to_string(environment_score) + "\n";
+    for(Facility* f : facilities){
+        str+="facilityName:"+f->getName();
+        str+="facilityStatus: OPERATIONAL \n";
+    }
+    for(Facility* f : underConstruction){
+        str+="facilityName:"+f->getName();
+        str+="facilityStatus: UNDER_CONSTRUCTIONS \n";
+    }
     return str;
 }

@@ -1,8 +1,7 @@
 #include "SelectionPolicy.h"
 #include <vector>
 #include <iostream>
-#include "Facility.cpp"  // Include the header file
-
+#include <algorithm> // For std::max_element and std::min_element
 
 
 NaiveSelection::NaiveSelection() : lastSelectedIndex(0) {}
@@ -56,6 +55,7 @@ const FacilityType& BalancedSelection::selectFacility(const vector<FacilityType>
         environmentScore = EnvironmentScore + facility.getEnvironmentScore();
         maxScore = std::max({lifeScore, economyScore, environmentScore});
         minScore = std::min({lifeScore, economyScore, environmentScore});
+
         scoreDifference = maxScore - minScore; 
         if (scoreDifference < smallestScoreDifference) {
             smallestScoreDifference = scoreDifference;
@@ -69,6 +69,7 @@ const FacilityType& BalancedSelection::selectFacility(const vector<FacilityType>
     return *bestFacility;
 }
 
+
 const string BalancedSelection::toString() const {
     return "Balanced Selection Policy";
 }
@@ -81,7 +82,8 @@ BalancedSelection* BalancedSelection::clone() const {
 
 EconomySelection::EconomySelection() : lastSelectedIndex(0) {}
 
-const FacilityType& selectFacility(const vector<FacilityType>& facilitiesOptions) {
+const FacilityType& EconomySelection::selectFacility(const vector<FacilityType>& facilitiesOptions)
+ {
     if (facilitiesOptions.empty()) {
         // Send error if the vector is empty (you can replace this with error handling code)
         throw std::invalid_argument("Facilities options cannot be empty.");
@@ -90,7 +92,7 @@ const FacilityType& selectFacility(const vector<FacilityType>& facilitiesOptions
     int bestScore = facilitiesOptions[0].getEconomyScore();
     int lastSelectedIndex = 0;  // Initialize index of the best facility
 
-    for (int i = 1; i < facilitiesOptions.size(); i++) {  // Start from index 1, as 0 is already considered
+    for (size_t i = 1; i < facilitiesOptions.size(); i++) {  // Start from index 1, as 0 is already considered
         if (facilitiesOptions[i].getEconomyScore() > bestScore) {
             bestScore = facilitiesOptions[i].getEconomyScore();
             lastSelectedIndex = i;
@@ -122,9 +124,9 @@ const FacilityType& SustainabilitySelection::selectFacility(const vector<Facilit
     }
     int bestScore = facilitiesOptions[0].getEnvironmentScore();
     FacilityType* bestFacility = nullptr;
-        for(int i=0;i<facilitiesOptions.size();i++){
+        for(size_t i = 1; i < facilitiesOptions.size(); i++){
             if (facilitiesOptions[i].getEnvironmentScore() > bestScore) {
-                bestScore = facilitiesOptions[i].getEconomyScore();
+                bestScore = facilitiesOptions[i].getEnvironmentScore();
                 lastSelectedIndex = i;
             }
         }

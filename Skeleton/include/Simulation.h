@@ -31,8 +31,9 @@ class Simulation {
         void addFacilityToPlan(const vector<string>& args);
         void CreatePlan(const vector<string>& args);
         SelectionPolicy*getSellectionPolicy(const string &policy) ;
-
-
+        std::vector<BaseAction*>& getAction();
+        SettlementType getSettlementType(const string type) ; 
+        FacilityCategory getFacitlityType(const string type);
     private:
         bool isRunning;
         int planCounter; //For assigning unique plan IDs

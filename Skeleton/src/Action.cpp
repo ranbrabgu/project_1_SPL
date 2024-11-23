@@ -7,6 +7,7 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::ostringstream;
+BaseAction::BaseAction() {}
 
 ActionStatus BaseAction::getStatus() const {
     return status;
@@ -55,7 +56,9 @@ AddSettlement::AddSettlement(const string &settlementName,SettlementType settlem
     simulation.addSettlement(settlement); 
 }
 
-//AddSettlement *AddSettlement:: *clone() {return new AddSettlement(*this)}
+AddSettlement* AddSettlement::clone() const {
+    return new AddSettlement(*this);
+}
 const string AddSettlement::toString()const {
     string typeStr;
     switch (settlementType) {
@@ -90,8 +93,11 @@ void AddFacility::act(Simulation &simulation) {
     simulation.addFacility(*facility);  // Pass the pointer
 }
 
-AddFacility *clone() {
+// Action.cpp (or wherever AddFacility is defined)
 
+AddFacility* AddFacility::clone() const {
+
+  return new AddFacility(*this); // Example using copy constructor
 }
 const string AddFacility::toString() const {
     return "AddFacility: " + facilityName + 
@@ -100,4 +106,114 @@ const string AddFacility::toString() const {
            ", Life Quality: " + std::to_string(lifeQualityScore) +
            ", Economy: " + std::to_string(economyScore) +
            ", Environment: " + std::to_string(environmentScore) + "]";
+}
+
+PrintPlanStatus::PrintPlanStatus(int planId): planId(planId) {}
+void PrintPlanStatus::act(Simulation &simulation){
+    Plan p=simulation.getPlan(planId);
+        cout << p.toString() << endl;
+
+}
+PrintPlanStatus* PrintPlanStatus::clone() const {
+
+  return new PrintPlanStatus(*this); // Example using copy constructor
+}
+const string PrintPlanStatus::toString() const {
+    return "planId: "+planId;
+}
+
+ChangePlanPolicy::ChangePlanPolicy(const int planId, const string &newPolicy):planId(planId),newPolicy(newPolicy){}
+        void ChangePlanPolicy:: act(Simulation &simulation) {
+            Plan p=simulation.getPlan(planId);
+           SelectionPolicy* s1;
+        if (newPolicy == "eco") {
+        s1 = new EconomySelection();
+    }
+    else if (newPolicy == "bal") {
+        s1 = new BalancedSelection(0, 0, 0);  // Adjust parameters as needed
+    }
+    else if (newPolicy == "nve") {
+        s1 = new NaiveSelection();
+    }
+    else if (newPolicy == "env") {
+        s1 = new SustainabilitySelection();
+    }
+    else {
+        cout << "Error: Unknown selection policy '" << newPolicy << "'." << endl;
+        return;
+    }
+    p.setSelectionPolicy(s1);
+
+        }
+ChangePlanPolicy* ChangePlanPolicy::clone() const {
+
+  return new ChangePlanPolicy(*this); // Example using copy constructor
+}
+const string ChangePlanPolicy::toString() const {
+    string str="planId: "+std::to_string(planId)+"\n";
+    str+="newPolicy: "+ newPolicy;
+    return str;
+}
+
+PrintActionsLog::PrintActionsLog(){}
+void PrintActionsLog:: act(Simulation &simulation) {
+    std::vector<BaseAction*>& list = simulation.getAction(); // Reference to the actionsLog
+    for (BaseAction* b : list) { // Iterate using pointers
+        if (b) { // Check for null pointer safety
+            cout << b->toString() << endl; // Call the virtual function via the pointer
+        }
+    }
+}
+
+PrintActionsLog* PrintActionsLog::clone() const {
+
+  return new PrintActionsLog(*this); // Example using copy constructor
+}
+const string PrintActionsLog::toString() const {
+    string str="";
+    return str;
+}
+
+Close::Close(){}
+void Close:: act(Simulation &simulation) {
+     simulation.close(); // Reference to the actionsLog
+
+}
+
+Close* Close::clone() const {
+
+  return new Close(*this); // Example using copy constructor
+}
+const string Close::toString() const {
+    string str="";
+    return str;
+}
+
+
+RestoreSimulation::RestoreSimulation(){}
+void RestoreSimulation:: act(Simulation &simulation) {
+
+}
+
+RestoreSimulation* RestoreSimulation::clone() const {
+
+  return new RestoreSimulation(*this); // Example using copy constructor
+}
+const string RestoreSimulation::toString() const {
+    string str="";
+    return str;
+}
+
+BackupSimulation::BackupSimulation(){}
+void BackupSimulation:: act(Simulation &simulation) {
+
+}
+
+BackupSimulation* BackupSimulation::clone() const {
+
+  return new BackupSimulation(*this); // Example using copy constructor
+}
+const string BackupSimulation::toString() const {
+    string str="";
+    return str;
 }
