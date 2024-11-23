@@ -35,7 +35,6 @@ const vector<Facility*> &Plan::getFacilities() const {
 
 // Set Selection Policy
 void Plan::setSelectionPolicy(SelectionPolicy *selectionPolicy) {
-    delete this->selectionPolicy;
     this->selectionPolicy = selectionPolicy;
 }
 void Plan::addFacility(Facility* facility) {
@@ -68,6 +67,7 @@ const int Plan::getPlanId(){
 const string Plan::toString() const {
     string str = "Plan ID: " + std::to_string(plan_id) + "\n";
     string statuse_val = (status == PlanStatus::AVALIABLE) ? "Available" : "Busy";
+    str += "selectionPolicy" + selectionPolicy->toString();
     str += "Status: " + statuse_val + "\n";
     str += "Life Quality Score: " + std::to_string(life_quality_score) + "\n";
     str += "Economy Score: " + std::to_string(economy_score) + "\n";

@@ -110,7 +110,9 @@ const string AddFacility::toString() const {
 
 PrintPlanStatus::PrintPlanStatus(int planId): planId(planId) {}
 void PrintPlanStatus::act(Simulation &simulation){
-    Plan p=simulation.getPlan(planId);
+            cout << "p.toString() "<< endl;
+
+    Plan& p=simulation.getPlan(planId);
         cout << p.toString() << endl;
 
 }
@@ -124,7 +126,11 @@ const string PrintPlanStatus::toString() const {
 
 ChangePlanPolicy::ChangePlanPolicy(const int planId, const string &newPolicy):planId(planId),newPolicy(newPolicy){}
         void ChangePlanPolicy:: act(Simulation &simulation) {
-            Plan p=simulation.getPlan(planId);
+                cout << "this place" << endl;
+
+            Plan p = simulation.getPlan(planId);
+        cout << "this place" << endl;
+
            SelectionPolicy* s1;
         if (newPolicy == "eco") {
         s1 = new EconomySelection();

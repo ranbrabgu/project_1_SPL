@@ -1,4 +1,4 @@
-all: clean compile link run
+all: clean compile link
 
 clean:
 	rm -f bin/*
@@ -17,4 +17,4 @@ link:
 	g++ -o bin/simulation bin/main.o bin/Settlement.o bin/Action.o bin/Auxiliary.o bin/Facility.o bin/Plan.o bin/SelectionPolicy.o bin/Simulation.o
 
 run:
-	./bin/simulation
+	./bin/simulation config_file.txt

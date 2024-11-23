@@ -15,9 +15,7 @@ using std::ifstream;
 using std::runtime_error;
 using std::string;
 
-Simulation::Simulation(const string &configFilePath) : isRunning(false), planCounter(0), actionsLog(vector<BaseAction*>()), plans(vector<Plan>()), settlements(vector<Settlement>()), facilitiesOptions(vector<FacilityType>()) {
-
-
+Simulation::Simulation(const string &configFilePath) : isRunning(true), planCounter(0), actionsLog(vector<BaseAction*>()), plans(vector<Plan>()), settlements(vector<Settlement>()), facilitiesOptions(vector<FacilityType>()) {
 
 
     std::ifstream configFile(configFilePath);
@@ -35,7 +33,6 @@ Simulation::Simulation(const string &configFilePath) : isRunning(false), planCou
         const std::string& command = args[0];
         if (command == "settlement") {
                 CreateSettlement(args);
-            actionsLog.push_back(base);
         } else if (command == "facility") {
             CreateFacility(args);
         } else if (command == "plan") {
@@ -51,18 +48,44 @@ Simulation::Simulation(const string &configFilePath) : isRunning(false), planCou
 
 
 void Simulation::start(){
+    string fullLine = "";
+    cout << "The simulation has started" << endl; // Outputs the message
+
     while (isRunning)
     {
-        cout << "The simulation has started"; // Outputs the message
-        string line;
-        getline(std::cin, line); 
-        std::vector<std::string> args = Auxiliary::parseArguments(line);
-        if(args[0]=="plan"){
-            BaseAction* base= new AddPlan(args[1],args[2]);
-            actionsLog.push_back(base);
-        }
+        cout << "Please enter your action:" << endl; // Outputs the message
+        std::getline(std::cin, fullLine);
+        std::vector<std::string> args = Auxiliary::parseArguments(fullLine);
 
-        
+        if (args[0] == "settlement") {
+            CreateSettlement(args);
+        } else if (args[0] == "facility") {
+            CreateFacility(args);
+        } else if (args[0] == "plan") {
+            CreatePlan(args);
+        }
+        else if(args[0]=="planStatus"){
+            int id = std::stoi(args[1]);  
+
+            BaseAction* base = new PrintPlanStatus(id);
+            base->act(*this);
+            addAction(base);
+        }
+        else if (args[0]=="changePolicy"){
+            cout << "in change policy" << endl;
+            int id = std::stoi(args[1]);  
+            BaseAction* base = new ChangePlanPolicy(id,args[2]);
+            cout << "base created" << endl;
+            base->act(*this); // Error here
+            cout << "base act" << endl;
+            addAction(base);
+            cout << "base added" << endl;
+        }
+        else if (args[0]=="log"){
+            BaseAction* base = new PrintActionsLog();
+            base->act(*this);
+            addAction(base);
+        }
 
     }
     
@@ -75,15 +98,20 @@ void Simulation::start(){
 
 
 void Simulation::addPlan(const Settlement &settlement, SelectionPolicy *selectionPolicy){
-    int lastPlanId = plans.empty() ? 0 : plans.back().getPlanId();
+
+    int lastPlanId = plans.empty() ? 0 : (plans.back().getPlanId()+1);
+    cout << lastPlanId << endl;
+
     Plan p = Plan(lastPlanId,settlement,selectionPolicy,facilitiesOptions);
+    plans.push_back(p);
     // user action: add plan
 
     //recives info from use, and creates a plan. (chacks if a plan can be added to the setelment in menchen)
 }
 
-void addAction(BaseAction *action){
+void Simulation::addAction(BaseAction *action){
     // every tick, the user enters his action
+    actionsLog.push_back(action);
 
     // action being logged
 
@@ -131,15 +159,20 @@ Settlement &Simulation::getSettlement(const string &settlementName){
 }
 
 
-Plan &Simulation::getPlan(const int planID){
-    for (Plan plan : plans)
-    {
-        if(plan.getPlanId() == planID)
-            return plan;
+Plan& Simulation::getPlan(const int planID) {
+    if (plans.empty()) {
+        throw std::runtime_error("No plans available.");
     }
-    throw std::runtime_error("Plan not found");
 
+    for (auto plan : plans) {
+        if (plan.getPlanId() == planID) {
+            return plan;
+        }
+    }
+
+    throw std::runtime_error("Plan not found.");
 }
+
 
 void Simulation::step(){
     // main step:
@@ -167,8 +200,8 @@ void Simulation::CreateSettlement(const vector<string>& args) {
         return;
     }
     BaseAction* base = new AddSettlement(args[1],getSettlementType(args[2]));
-    base->act(this);
-    actionsLog.push_back(base);
+    base->act(*this);
+            addAction(base);
 
 
 }
@@ -185,9 +218,9 @@ void Simulation::CreateFacility(const vector<string>& args) {
     int economy_score = std::stoi(args[5]);
     int environment_score = std::stoi(args[6]);
     string settlementName=args[1];
-    BaseAction* base =new AddFacility(args[1],getFacitlityType(args[2]),price, lifeQuality_score, economy_score, environment_score)
-    base->act(this);
-    actionsLog.push_back(base);
+    BaseAction* base =new AddFacility(args[1],getFacitlityType(args[2]),price, lifeQuality_score, economy_score, environment_score);
+    base->act(*this);
+            addAction(base);
 }
 SelectionPolicy* Simulation::getSellectionPolicy(const string &policy) {
     if (policy == "eco") {
@@ -235,7 +268,7 @@ FacilityCategory Simulation:: getFacitlityType(const string type){
 
 void Simulation::CreatePlan(const vector<string>& args) {
             BaseAction* base = new AddPlan(args[1],args[2]);
-            base->act(this);
-            actionsLog.push_back(base);
+            base->act(*this);
+            addAction(base);
 }
 
